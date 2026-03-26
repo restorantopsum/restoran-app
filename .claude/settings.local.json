@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx create-react-app:*)",
+      "Bash(cp -r temp_app/* .)",
+      "Bash(cp temp_app/.gitignore .)",
+      "Bash(rm -rf temp_app)",
+      "Bash(mv temp_app/package.json .)",
+      "Bash(mv temp_app/package-lock.json .)",
+      "Bash(mv temp_app/public .)",
+      "Bash(mv temp_app/src .)",
+      "Bash(mv temp_app/README.md .)"
+    ]
+  }
+}
