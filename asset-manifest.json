@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/restoran-app/static/css/main.fac4b4b0.css",
+    "main.js": "/restoran-app/static/js/main.6c7df2e9.js",
+    "static/js/453.cc5aba83.chunk.js": "/restoran-app/static/js/453.cc5aba83.chunk.js",
+    "index.html": "/restoran-app/index.html",
+    "main.fac4b4b0.css.map": "/restoran-app/static/css/main.fac4b4b0.css.map",
+    "main.6c7df2e9.js.map": "/restoran-app/static/js/main.6c7df2e9.js.map",
+    "453.cc5aba83.chunk.js.map": "/restoran-app/static/js/453.cc5aba83.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.fac4b4b0.css",
+    "static/js/main.6c7df2e9.js"
+  ]
+}
