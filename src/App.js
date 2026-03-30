@@ -244,6 +244,14 @@ function App() {
     saveTables(updated);
   };
 
+  const handleCloseDay = () => {
+    const openTables = tables.filter(t => t.status === 'open');
+    if (openTables.length > 0) return;
+    saveOrders([]);
+    showToast('✓ Gün bağlandı. Yeni günə uğurlar!');
+    setView('open-tables');
+  };
+
   const handleChangeView = (newView) => {
     setView(newView);
   };
@@ -281,6 +289,7 @@ function App() {
         invoice={invoice}
         onConfirmCheckout={handleConfirmCheckout}
         onCancelCheckout={() => setView('menu')}
+        onCloseDay={handleCloseDay}
       />
       <RightPanel
         activeView={view}

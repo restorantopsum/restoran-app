@@ -522,6 +522,43 @@ body {
   color: #fff;
 }
 
+/* Z Report */
+.z-receipt {
+  width: 400px;
+}
+
+.z-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.z-stat-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.95rem;
+  padding: 2px 0;
+}
+
+.z-close-day {
+  background: linear-gradient(135deg, #c0392b, #e94560) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 15px rgba(192, 57, 43, 0.4) !important;
+}
+
+.z-close-day:disabled {
+  opacity: 0.4;
+  cursor: not-allowed !important;
+  transform: none !important;
+}
+
+.z-warning {
+  color: #f39c12;
+  font-size: 0.9rem;
+  margin-top: 12px;
+  text-align: center;
+}
+
 /* ====== REPORT ====== */
 .report-grid {
   display: grid;

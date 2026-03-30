@@ -6,6 +6,7 @@ function RightPanel({ activeView, onChangeView, onPlaceOrder, onCloseTable, curr
     { id: 'closed-tables', label: 'Bağlı Masalar' },
     { id: 'menu', label: 'Menyu' },
     { id: 'report', label: 'Hesabat' },
+    { id: 'z-report', label: 'Z Hesabat' },
     { id: 'settings', label: 'Ayarlar' },
   ];
 

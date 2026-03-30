@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-function CenterPanel({ view, menuData, onAddToInvoice, tables, onSelectTable, orders, onReopenOrder, onAddTable, onDeleteTable, onRenameTable, onAddCategory, onRenameCategory, onDeleteCategory, onAddProduct, onEditProduct, onDeleteProduct, currentTable, invoice, onConfirmCheckout, onCancelCheckout }) {
+function CenterPanel({ view, menuData, onAddToInvoice, tables, onSelectTable, orders, onReopenOrder, onAddTable, onDeleteTable, onRenameTable, onAddCategory, onRenameCategory, onDeleteCategory, onAddProduct, onEditProduct, onDeleteProduct, currentTable, invoice, onConfirmCheckout, onCancelCheckout, onCloseDay }) {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [reportTab, setReportTab] = useState('table');
   const [selectedReportTable, setSelectedReportTable] = useState(null);
@@ -285,6 +285,95 @@ function CenterPanel({ view, menuData, onAddToInvoice, tables, onSelectTable, or
               <span>{totalRevenue.toFixed(2)} ₼</span>
             </div>
           </div>
+        )}
+      </div>
+    );
+  }
+
+  if (view === 'z-report') {
+    const allOrders = orders || [];
+    const todayStr = new Date().toLocaleDateString();
+    const todayOrders = allOrders.filter(o => new Date(o.closedAt).toLocaleDateString() === todayStr);
+    const totalRevenue = todayOrders.reduce((sum, o) => sum + o.total, 0);
+    const totalDeleted = todayOrders.reduce((sum, o) => sum + (o.deletedCount || 0), 0);
+    const totalItems = todayOrders.reduce((sum, o) => sum + o.items.filter(i => !i.deleted).reduce((s, i) => s + i.quantity, 0), 0);
+    const openTables = tables.filter(t => t.status === 'open');
+
+    // Məhsul yekunu
+    const productSummary = {};
+    todayOrders.forEach(order => {
+      order.items.forEach(item => {
+        if (!item.deleted) {
+          if (!productSummary[item.name]) {
+            productSummary[item.name] = { quantity: 0, revenue: 0 };
+          }
+          productSummary[item.name].quantity += item.quantity;
+          productSummary[item.name].revenue += item.price * item.quantity;
+        }
+      });
+    });
+    const productRows = Object.entries(productSummary).sort((a, b) => b[1].revenue - a[1].revenue);
+
+    return (
+      <div className="center-panel checkout-view">
+        <div className="checkout-receipt z-receipt">
+          <div className="receipt-header">
+            <div className="receipt-title">Z HESABAT</div>
+            <div className="receipt-date">{new Date().toLocaleString()}</div>
+            <div className="receipt-divider">{'─'.repeat(40)}</div>
+          </div>
+
+          <div className="z-stats">
+            <div className="z-stat-row">
+              <span>Bağlanmış masa</span>
+              <span>{todayOrders.length}</span>
+            </div>
+            <div className="z-stat-row">
+              <span>Satılan məhsul</span>
+              <span>{totalItems} ədəd</span>
+            </div>
+            <div className="z-stat-row">
+              <span>Silinmiş məhsul</span>
+              <span>{totalDeleted}</span>
+            </div>
+            <div className="z-stat-row">
+              <span>Açıq masa (hələ bağlanmayıb)</span>
+              <span>{openTables.length}</span>
+            </div>
+          </div>
+
+          <div className="receipt-divider">{'─'.repeat(40)}</div>
+
+          <div className="receipt-items">
+            {productRows.map(([name, data], i) => (
+              <div key={i} className="receipt-line">
+                <span className="receipt-item-name">{data.quantity}x {name}</span>
+                <span className="receipt-item-dots">{'·'.repeat(20)}</span>
+                <span className="receipt-item-price">{data.revenue.toFixed(2)} ₼</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="receipt-divider">{'─'.repeat(40)}</div>
+          <div className="receipt-total">
+            <span>GÜNLÜK CƏMİ</span>
+            <span>{totalRevenue.toFixed(2)} ₼</span>
+          </div>
+          <div className="receipt-divider">{'─'.repeat(40)}</div>
+        </div>
+
+        <div className="checkout-actions">
+          <button
+            className="checkout-btn z-close-day"
+            disabled={openTables.length > 0}
+            onClick={onCloseDay}
+            title={openTables.length > 0 ? 'Əvvəlcə bütün masaları bağlayın' : ''}
+          >
+            Günü Bağla
+          </button>
+        </div>
+        {openTables.length > 0 && (
+          <p className="z-warning">⚠ {openTables.length} açıq masa var. Günü bağlamaq üçün əvvəlcə bütün masaları bağlayın.</p>
         )}
       </div>
     );
