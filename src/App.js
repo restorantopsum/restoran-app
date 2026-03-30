@@ -13,6 +13,7 @@ function App() {
   const [currentTable, setCurrentTable] = useState(null);
   const [invoice, setInvoice] = useState([]);
   const [selectedItemIndex, setSelectedItemIndex] = useState(null);
+  const [toast, setToast] = useState(null);
 
   useEffect(() => {
     initializeData();
@@ -29,6 +30,49 @@ function App() {
   const saveOrders = (updated) => {
     setOrders(updated);
     setData(STORAGE_KEYS.ORDERS, updated);
+  };
+
+  const saveMenu = (updated) => {
+    setMenuData(updated);
+    setData(STORAGE_KEYS.MENU, updated);
+  };
+
+  // Kateqoriya əməliyyatları
+  const handleAddCategory = (name) => {
+    const maxId = menuData.reduce((max, c) => Math.max(max, c.id), 0);
+    saveMenu([...menuData, { id: maxId + 1, name, items: [] }]);
+  };
+
+  const handleRenameCategory = (catId, newName) => {
+    if (!newName.trim()) return;
+    saveMenu(menuData.map(c => c.id === catId ? { ...c, name: newName.trim() } : c));
+  };
+
+  const handleDeleteCategory = (catId) => {
+    saveMenu(menuData.filter(c => c.id !== catId));
+  };
+
+  // Məhsul əməliyyatları
+  const handleAddProduct = (catId, name, price) => {
+    const cat = menuData.find(c => c.id === catId);
+    const maxId = cat.items.reduce((max, i) => Math.max(max, i.id), 0);
+    const newItem = { id: maxId + 1, name, price: parseFloat(price) };
+    saveMenu(menuData.map(c => c.id === catId ? { ...c, items: [...c.items, newItem] } : c));
+  };
+
+  const handleEditProduct = (catId, itemId, name, price) => {
+    if (!name.trim()) return;
+    saveMenu(menuData.map(c => c.id === catId ? {
+      ...c,
+      items: c.items.map(i => i.id === itemId ? { ...i, name: name.trim(), price: parseFloat(price) } : i)
+    } : c));
+  };
+
+  const handleDeleteProduct = (catId, itemId) => {
+    saveMenu(menuData.map(c => c.id === catId ? {
+      ...c,
+      items: c.items.filter(i => i.id !== itemId)
+    } : c));
   };
 
   const handleSelectTable = (table) => {
@@ -104,14 +148,27 @@ function App() {
     setSelectedItemIndex(null);
   };
 
+  const showToast = (message) => {
+    setToast(message);
+    setTimeout(() => setToast(null), 2500);
+  };
+
   const handlePlaceOrder = () => {
     if (!currentTable || invoice.length === 0) return;
     const activeItems = invoice.filter(item => !item.deleted);
     if (activeItems.length === 0) return;
     updateTableOrders(invoice);
+    showToast(`✓ ${currentTable.name} — Sifariş göndərildi!`);
   };
 
   const handleCloseTable = () => {
+    if (!currentTable) return;
+    const activeItems = invoice.filter(item => !item.deleted);
+    if (activeItems.length === 0) return;
+    setView('checkout');
+  };
+
+  const handleConfirmCheckout = () => {
     if (!currentTable) return;
     const activeItems = invoice.filter(item => !item.deleted);
     const total = activeItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -135,6 +192,7 @@ function App() {
     );
     saveTables(updated);
 
+    showToast(`✓ ${currentTable.name} — Hesab bağlandı! ${total.toFixed(2)} ₼`);
     setCurrentTable(null);
     setInvoice([]);
     setSelectedItemIndex(null);
@@ -161,12 +219,38 @@ function App() {
     setView('menu');
   };
 
+  const handleAddTable = () => {
+    const maxId = tables.reduce((max, t) => Math.max(max, t.id), 0);
+    const newTable = {
+      id: maxId + 1,
+      name: `Masa ${maxId + 1}`,
+      status: 'closed',
+      orders: [],
+    };
+    saveTables([...tables, newTable]);
+  };
+
+  const handleDeleteTable = (tableId) => {
+    const table = tables.find(t => t.id === tableId);
+    if (table && table.status === 'open') return;
+    saveTables(tables.filter(t => t.id !== tableId));
+  };
+
+  const handleRenameTable = (tableId, newName) => {
+    if (!newName.trim()) return;
+    const updated = tables.map(t =>
+      t.id === tableId ? { ...t, name: newName.trim() } : t
+    );
+    saveTables(updated);
+  };
+
   const handleChangeView = (newView) => {
     setView(newView);
   };
 
   return (
     <div className="app-container">
+      {toast && <div className="toast">{toast}</div>}
       <LeftPanel
         table={currentTable}
         invoice={invoice}
@@ -182,8 +266,21 @@ function App() {
         onAddToInvoice={handleAddToInvoice}
         tables={tables}
         onSelectTable={handleSelectTable}
+        currentTable={currentTable}
         orders={orders}
         onReopenOrder={handleReopenOrder}
+        onAddTable={handleAddTable}
+        onDeleteTable={handleDeleteTable}
+        onRenameTable={handleRenameTable}
+        onAddCategory={handleAddCategory}
+        onRenameCategory={handleRenameCategory}
+        onDeleteCategory={handleDeleteCategory}
+        onAddProduct={handleAddProduct}
+        onEditProduct={handleEditProduct}
+        onDeleteProduct={handleDeleteProduct}
+        invoice={invoice}
+        onConfirmCheckout={handleConfirmCheckout}
+        onCancelCheckout={() => setView('menu')}
       />
       <RightPanel
         activeView={view}
