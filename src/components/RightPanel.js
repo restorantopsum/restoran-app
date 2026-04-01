@@ -3,7 +3,8 @@ import React from 'react';
 function RightPanel({ activeView, onChangeView, onPlaceOrder, onCloseTable, currentTable }) {
   const buttons = [
     { id: 'open-tables', label: 'Açıq Masalar' },
-    { id: 'closed-tables', label: 'Bağlı Masalar' },
+    { id: 'served-tables', label: 'Bağlanmış Masalar' },
+    { id: 'closed-tables', label: 'Masalar' },
     { id: 'menu', label: 'Menyu' },
     { id: 'report', label: 'Hesabat' },
     { id: 'z-report', label: 'Z Hesabat' },

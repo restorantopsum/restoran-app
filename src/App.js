@@ -14,6 +14,7 @@ function App() {
   const [invoice, setInvoice] = useState([]);
   const [selectedItemIndex, setSelectedItemIndex] = useState(null);
   const [toast, setToast] = useState(null);
+  const [viewOrder, setViewOrder] = useState(null);
 
   useEffect(() => {
     initializeData();
@@ -79,13 +80,6 @@ function App() {
     setCurrentTable(table);
     setInvoice(table.orders || []);
     setSelectedItemIndex(null);
-    if (table.status === 'closed') {
-      const updated = tables.map(t =>
-        t.id === table.id ? { ...t, status: 'open' } : t
-      );
-      saveTables(updated);
-    }
-    setView('menu');
   };
 
   const handleAddToInvoice = (item) => {
@@ -95,10 +89,10 @@ function App() {
     let newInvoice;
     if (existingIndex >= 0) {
       newInvoice = invoice.map((inv, idx) =>
-        idx === existingIndex ? { ...inv, quantity: inv.quantity + 1 } : inv
+        idx === existingIndex ? { ...inv, quantity: inv.quantity + 1, ordered: false } : inv
       );
     } else {
-      newInvoice = [...invoice, { ...item, quantity: 1, deleted: false }];
+      newInvoice = [...invoice, { ...item, quantity: 1, deleted: false, ordered: false }];
     }
     setInvoice(newInvoice);
     updateTableOrders(newInvoice);
@@ -107,7 +101,7 @@ function App() {
   const updateTableOrders = (newInvoice) => {
     if (!currentTable) return;
     const updated = tables.map(t =>
-      t.id === currentTable.id ? { ...t, orders: newInvoice } : t
+      t.id === currentTable.id ? { ...t, orders: newInvoice, status: 'open' } : t
     );
     saveTables(updated);
   };
@@ -157,7 +151,9 @@ function App() {
     if (!currentTable || invoice.length === 0) return;
     const activeItems = invoice.filter(item => !item.deleted);
     if (activeItems.length === 0) return;
-    updateTableOrders(invoice);
+    const orderedInvoice = invoice.map(item => item.deleted ? item : { ...item, ordered: true });
+    setInvoice(orderedInvoice);
+    updateTableOrders(orderedInvoice);
     showToast(`✓ ${currentTable.name} — Sifariş göndərildi!`);
   };
 
@@ -216,6 +212,7 @@ function App() {
     setCurrentTable({ ...table, status: 'open', orders: order.items });
     setInvoice(order.items);
     setSelectedItemIndex(null);
+    setViewOrder(null);
     setView('menu');
   };
 
@@ -254,19 +251,21 @@ function App() {
 
   const handleChangeView = (newView) => {
     setView(newView);
+    setViewOrder(null);
   };
 
   return (
     <div className="app-container">
       {toast && <div className="toast">{toast}</div>}
       <LeftPanel
-        table={currentTable}
-        invoice={invoice}
-        selectedItemIndex={selectedItemIndex}
-        onSelectItem={setSelectedItemIndex}
+        table={viewOrder ? { name: viewOrder.tableName } : currentTable}
+        invoice={viewOrder ? viewOrder.items : invoice}
+        selectedItemIndex={viewOrder ? null : selectedItemIndex}
+        onSelectItem={viewOrder ? () => {} : setSelectedItemIndex}
         onIncrease={handleIncrease}
         onDecrease={handleDecrease}
         onDelete={handleDelete}
+        readOnly={!!viewOrder}
       />
       <CenterPanel
         view={view}
@@ -290,6 +289,7 @@ function App() {
         onConfirmCheckout={handleConfirmCheckout}
         onCancelCheckout={() => setView('menu')}
         onCloseDay={handleCloseDay}
+        onViewOrder={setViewOrder}
       />
       <RightPanel
         activeView={view}

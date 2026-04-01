@@ -135,10 +135,11 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 5px 4px;
+  padding: 10px 8px;
   border-bottom: 1px dotted #ddd;
   cursor: pointer;
   transition: background 0.15s;
+  font-size: 1rem;
 }
 
 .receipt-item:hover {
@@ -156,9 +157,30 @@ body {
   color: #999;
 }
 
+.receipt-item.item-ordered {
+  background: #1a1a1a;
+  color: #fff;
+}
+
+.receipt-item.item-ordered .receipt-item-qty,
+.receipt-item.item-ordered .receipt-item-price {
+  color: #fff;
+}
+
+.receipt-item.item-pending {
+  background: #f1c40f;
+  color: #000;
+}
+
+.receipt-item.item-pending .receipt-item-qty,
+.receipt-item.item-pending .receipt-item-price {
+  color: #000;
+}
+
 .receipt-item-qty {
-  width: 28px;
+  width: 32px;
   font-weight: bold;
+  font-size: 1.05rem;
   color: #333;
 }
 
@@ -326,6 +348,28 @@ body {
   color: #fff;
 }
 
+.table-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.table-btn-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.table-btn-total {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.table-btn-waiter {
+  font-size: 0.75rem;
+  opacity: 0.85;
+}
+
 /* ====== OPEN TABLES ROW ====== */
 .open-tables-list {
   display: flex;
@@ -351,6 +395,14 @@ body {
 
 .open-table-row.row-odd {
   background: linear-gradient(135deg, #3498db, #2980b9);
+}
+
+.open-table-row.served-even {
+  background: linear-gradient(135deg, #e67e22, #d35400);
+}
+
+.open-table-row.served-odd {
+  background: linear-gradient(135deg, #f39c12, #e67e22);
 }
 
 .open-table-row:hover {
@@ -763,6 +815,12 @@ body {
 .btn-reopen:hover {
   background: linear-gradient(135deg, #ffaa33, #ff9500);
   transform: translateY(-1px);
+}
+
+.btn-reopen-inline {
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  flex-shrink: 0;
 }
 
 .transaction-grand-total {

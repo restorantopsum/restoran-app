@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-function CenterPanel({ view, menuData, onAddToInvoice, tables, onSelectTable, orders, onReopenOrder, onAddTable, onDeleteTable, onRenameTable, onAddCategory, onRenameCategory, onDeleteCategory, onAddProduct, onEditProduct, onDeleteProduct, currentTable, invoice, onConfirmCheckout, onCancelCheckout, onCloseDay }) {
+function CenterPanel({ view, menuData, onAddToInvoice, tables, onSelectTable, orders, onReopenOrder, onAddTable, onDeleteTable, onRenameTable, onAddCategory, onRenameCategory, onDeleteCategory, onAddProduct, onEditProduct, onDeleteProduct, currentTable, invoice, onConfirmCheckout, onCancelCheckout, onCloseDay, onViewOrder }) {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [reportTab, setReportTab] = useState('table');
   const [selectedReportTable, setSelectedReportTable] = useState(null);
@@ -99,29 +99,71 @@ function CenterPanel({ view, menuData, onAddToInvoice, tables, onSelectTable, or
             })
           )}
         </div>
+
+      </div>
+    );
+  }
+
+  if (view === 'served-tables') {
+    const todayStr = new Date().toLocaleDateString();
+    const todayOrders = orders.filter(o => new Date(o.closedAt).toLocaleDateString() === todayStr);
+    return (
+      <div className="center-panel">
+        <h3>Bağlanmış Masalar ({todayOrders.length})</h3>
+        <div className="open-tables-list">
+          {todayOrders.length === 0 ? (
+            <p className="settings-placeholder">Bağlanmış masa yoxdur</p>
+          ) : (
+            todayOrders.map((order, idx) => {
+              const activeItems = order.items.filter(i => !i.deleted);
+              const itemCount = activeItems.reduce((s, i) => s + i.quantity, 0);
+              const isEven = idx % 2 === 0;
+              return (
+                <div
+                  key={order.id}
+                  className={`open-table-row served-row ${isEven ? 'served-even' : 'served-odd'}`}
+                  onClick={() => onViewOrder(order)}
+                >
+                  <span className="open-table-name">{order.tableName}</span>
+                  <span className="open-table-waiter">{new Date(order.closedAt).toLocaleTimeString()}</span>
+                  <span className="open-table-info">{itemCount} məhsul</span>
+                  <span className="open-table-total">{order.total.toFixed(2)} ₼</span>
+                  <button className="btn-reopen btn-reopen-inline" onClick={(e) => { e.stopPropagation(); onReopenOrder(order); }}>
+                    Yenidən Aç
+                  </button>
+                </div>
+              );
+            })
+          )}
+        </div>
       </div>
     );
   }
 
   if (view === 'closed-tables') {
-    const closedTables = tables.filter(t => t.status === 'closed');
     return (
       <div className="center-panel">
-        <h3>Bağlı Masalar</h3>
+        <h3>Masalar</h3>
         <div className="grid-container">
-          {closedTables.length === 0 ? (
-            <p>Bağlı masa yoxdur</p>
-          ) : (
-            closedTables.map(t => (
+          {tables.map(t => {
+            const items = (t.orders || []).filter(i => !i.deleted);
+            const total = items.reduce((s, i) => s + i.price * i.quantity, 0);
+            return (
               <button
                 key={t.id}
-                className="grid-btn table-btn table-closed"
+                className={`grid-btn table-btn ${t.status === 'open' ? 'table-open' : 'table-closed'}`}
                 onClick={() => onSelectTable(t)}
               >
-                {t.name}
+                <span className="table-btn-name">{t.name}</span>
+                {t.status === 'open' && (
+                  <>
+                    <span className="table-btn-total">{total.toFixed(2)} ₼</span>
+                    <span className="table-btn-waiter">Ofisiant</span>
+                  </>
+                )}
               </button>
-            ))
-          )}
+            );
+          })}
         </div>
       </div>
     );
@@ -402,17 +444,6 @@ function CenterPanel({ view, menuData, onAddToInvoice, tables, onSelectTable, or
                 <span className="receipt-item-price">{(item.price * item.quantity).toFixed(2)} ₼</span>
               </div>
             ))}
-            {deletedItems.length > 0 && (
-              <>
-                <div className="receipt-divider-light">{'─'.repeat(40)}</div>
-                {deletedItems.map((item, i) => (
-                  <div key={i} className="receipt-line deleted">
-                    <span className="receipt-item-name">{item.name}</span>
-                    <span className="receipt-item-price">SİLİNDİ</span>
-                  </div>
-                ))}
-              </>
-            )}
           </div>
 
           <div className="receipt-divider">{'─'.repeat(40)}</div>

@@ -1,6 +1,6 @@
 import React from 'react';
 
-function LeftPanel({ table, invoice, selectedItemIndex, onSelectItem, onIncrease, onDecrease, onDelete }) {
+function LeftPanel({ table, invoice, selectedItemIndex, onSelectItem, onIncrease, onDecrease, onDelete, readOnly }) {
   const activeItems = invoice.filter(item => !item.deleted);
   const total = activeItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
@@ -26,7 +26,7 @@ function LeftPanel({ table, invoice, selectedItemIndex, onSelectItem, onIncrease
               invoice.map((item, index) => (
                 <div
                   key={index}
-                  className={`receipt-item ${item.deleted ? 'deleted' : ''} ${selectedItemIndex === index ? 'selected' : ''}`}
+                  className={`receipt-item ${item.deleted ? 'deleted' : ''} ${selectedItemIndex === index ? 'selected' : ''} ${!item.deleted ? (item.ordered !== false ? 'item-ordered' : 'item-pending') : ''}`}
                   onClick={() => onSelectItem(index)}
                 >
                   <span className="receipt-item-qty">{item.quantity}x</span>
@@ -49,9 +49,9 @@ function LeftPanel({ table, invoice, selectedItemIndex, onSelectItem, onIncrease
       </div>
 
       <div className="left-bottom">
-        <button className="btn-action btn-plus" onClick={onIncrease}>+</button>
-        <button className="btn-action btn-delete" onClick={onDelete}>✕</button>
-        <button className="btn-action btn-minus" onClick={onDecrease}>−</button>
+        <button className="btn-action btn-plus" onClick={onIncrease} disabled={readOnly}>+</button>
+        <button className="btn-action btn-delete" onClick={onDelete} disabled={readOnly}>✕</button>
+        <button className="btn-action btn-minus" onClick={onDecrease} disabled={readOnly}>−</button>
       </div>
     </div>
   );
